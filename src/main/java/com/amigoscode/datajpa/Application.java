@@ -2,12 +2,14 @@ package com.amigoscode.datajpa;
 
 import com.amigoscode.datajpa.model.Student;
 import com.amigoscode.datajpa.repository.StudentRepository;
+import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @SpringBootApplication
 public class Application {
@@ -19,50 +21,31 @@ public class Application {
     @Bean
     CommandLineRunner commandLineRunner(StudentRepository studentRepository) {
         return args -> {
-            Student maria = new Student(
-                    "Maria",
-                    "Jones",
-                    "maria@gmail.com",
-                    21
-            );
-            Student maria2 = new Student(
-                    "Maria",
-                    "Jones",
-                    "maria2@gmail.com",
-                    25
-            );
-            Student maria3 = new Student(
-                    "Maria",
-                    "Jones",
-                    "maria3@gmail.com",
-                    29
-            );
-                    Student jose = new Student(
-                    "Jose",
-                    "Smith",
-                    "jose@gmail.com",
-                    27
-            );
-            System.out.print("adding maria and jose\n");
-            studentRepository.saveAll(List.of(maria, jose, maria2, maria3));
+            generateRandomStudents(studentRepository);
 
-            studentRepository.findStudentByEmail("jose@gmail.com")
-                    .ifPresentOrElse(System.out::println,
-                            () -> System.out.println("Email not found"));
-
-            studentRepository.findStudentsByFirstNameEqualsAndAgeEquals("Maria", 21)
-                    .forEach(System.out::println);
-
-            studentRepository.selectStudentsWhereFirstNameAndAgeGreaterOrEqual("Maria", 21)
-                    .forEach(System.out::println);
-
-            studentRepository.selectStudentsWhereFirstNameAndAgeGreaterOrEqualNative("Maria", 21)
-                    .forEach(System.out::println);
-
-            studentRepository.selectStudentsWhereFirstNameAndAgeGreaterOrEqualNativeNamedParams("Maria", 21)
-                    .forEach(System.out::println);
-
-            System.out.println(studentRepository.deleteStudentById(4L));
+            PageRequest pageRequest = PageRequest.of(0,5, Sort.by("firstName").ascending());            // page 0, size 5, sort by firstName ASC
+            Page<Student> page = studentRepository.findAll(pageRequest);
+            System.out.println(page);
         };
+    }
+
+    private void sortStudents(StudentRepository studentRepository) {
+        // Sort sort = Sort.by(Sort.Direction.DESC, "firstName");
+        Sort sort = Sort.by("firstName").ascending().and(Sort.by("age").descending());
+
+        studentRepository.findAll(sort)
+                .forEach(student -> System.out.println(student.getFirstName() + " " + student.getAge()));
+    }
+
+    private void generateRandomStudents(StudentRepository studentRepository) {
+        Faker faker = new Faker();
+        for (int i = 0; i < 20; i++) {
+            String firstName = faker.name().firstName();
+            String lastName = faker.name().lastName();
+            String email = String.format("%s.%s@amigoscode.edu", firstName, lastName).toLowerCase();
+            Integer age = faker.number().numberBetween(17, 55);
+            Student student = new Student(firstName, lastName,email, age);
+            studentRepository.save(student);
+        }
     }
 }
