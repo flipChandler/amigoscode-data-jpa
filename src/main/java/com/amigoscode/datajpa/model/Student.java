@@ -42,6 +42,10 @@ public class Student {
             nullable = false)
     private Integer age;
 
+    @OneToOne(mappedBy = "student",
+            orphanRemoval = true)                       // deleting student, delete student id card too
+    private StudentIdCard studentIdCard;
+
     public Student() {
     }
 
@@ -90,6 +94,10 @@ public class Student {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public StudentIdCard getStudentIdCard() {
+        return studentIdCard;
     }
 
     @Override

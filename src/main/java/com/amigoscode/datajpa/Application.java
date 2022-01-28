@@ -1,6 +1,8 @@
 package com.amigoscode.datajpa;
 
 import com.amigoscode.datajpa.model.Student;
+import com.amigoscode.datajpa.model.StudentIdCard;
+import com.amigoscode.datajpa.repository.StudentIdCardRepository;
 import com.amigoscode.datajpa.repository.StudentRepository;
 import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
@@ -19,14 +21,29 @@ public class Application {
     }
 
     @Bean
-    CommandLineRunner commandLineRunner(StudentRepository studentRepository) {
+    CommandLineRunner commandLineRunner(StudentRepository studentRepository,
+                                        StudentIdCardRepository studentIdCardRepository) {
         return args -> {
-            generateRandomStudents(studentRepository);
+            Faker faker = new Faker();
+            String firstName = faker.name().firstName();
+            String lastName = faker.name().lastName();
+            String email = String.format("%s.%s@amigoscode.edu", firstName, lastName).toLowerCase();
+            Integer age = faker.number().numberBetween(17, 55);
+            Student student = new Student(firstName, lastName,email, age);
+            StudentIdCard studentIdCard = new StudentIdCard("123456789", student);
 
-            PageRequest pageRequest = PageRequest.of(0,5, Sort.by("firstName").ascending());            // page 0, size 5, sort by firstName ASC
-            Page<Student> page = studentRepository.findAll(pageRequest);
-            System.out.println(page);
+            studentIdCardRepository.save(studentIdCard);
+
+            studentRepository.findById(1L).ifPresent(System.out::println);
+
+            studentIdCardRepository.findById(1L).ifPresent(System.out::println);
         };
+    }
+
+    private void studentsListPaged(StudentRepository studentRepository) {
+        PageRequest pageRequest = PageRequest.of(0,5, Sort.by("firstName").ascending());            // page 0, size 5, sort by firstName ASC
+        Page<Student> page = studentRepository.findAll(pageRequest);
+        System.out.println(page);
     }
 
     private void sortStudents(StudentRepository studentRepository) {
