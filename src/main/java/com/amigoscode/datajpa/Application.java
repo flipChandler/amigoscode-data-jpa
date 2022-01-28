@@ -22,43 +22,47 @@ public class Application {
             Student maria = new Student(
                     "Maria",
                     "Jones",
-                    "maria@gmai.com",
+                    "maria@gmail.com",
                     21
             );
-            Student jose = new Student(
+            Student maria2 = new Student(
+                    "Maria",
+                    "Jones",
+                    "maria2@gmail.com",
+                    25
+            );
+            Student maria3 = new Student(
+                    "Maria",
+                    "Jones",
+                    "maria3@gmail.com",
+                    29
+            );
+                    Student jose = new Student(
                     "Jose",
                     "Smith",
-                    "jose@gmai.com",
+                    "jose@gmail.com",
                     27
             );
             System.out.print("adding maria and jose\n");
-            studentRepository.saveAll(List.of(maria, jose));
+            studentRepository.saveAll(List.of(maria, jose, maria2, maria3));
 
-            System.out.print("number of students\n");
-            System.out.print(studentRepository.count());
+            studentRepository.findStudentByEmail("jose@gmail.com")
+                    .ifPresentOrElse(System.out::println,
+                            () -> System.out.println("Email not found"));
 
+            studentRepository.findStudentsByFirstNameEqualsAndAgeEquals("Maria", 21)
+                    .forEach(System.out::println);
 
-            studentRepository.findById(2L).ifPresentOrElse(student -> {
-                System.out.println(student);
-            }, () -> {
-                System.out.println("student with id 2 not found");
-            });
+            studentRepository.selectStudentsWhereFirstNameAndAgeGreaterOrEqual("Maria", 21)
+                    .forEach(System.out::println);
 
-            studentRepository.findById(2L).ifPresentOrElse(student -> {
-                System.out.println(student);
-            }, () -> {
-                System.out.println("student with id 3 not found");
-            });
+            studentRepository.selectStudentsWhereFirstNameAndAgeGreaterOrEqualNative("Maria", 21)
+                    .forEach(System.out::println);
 
-            System.out.println("select all students");
-            List<Student> students = studentRepository.findAll();
-            students.forEach(System.out::println);
+            studentRepository.selectStudentsWhereFirstNameAndAgeGreaterOrEqualNativeNamedParams("Maria", 21)
+                    .forEach(System.out::println);
 
-            System.out.println("delete maria");
-            studentRepository.deleteById(1L);
-
-            System.out.println("number of students");
-            System.out.println(studentRepository.count());
+            System.out.println(studentRepository.deleteStudentById(4L));
         };
     }
 }
