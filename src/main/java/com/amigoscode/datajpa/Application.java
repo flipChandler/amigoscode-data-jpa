@@ -1,8 +1,6 @@
 package com.amigoscode.datajpa;
 
-import com.amigoscode.datajpa.model.Book;
-import com.amigoscode.datajpa.model.Student;
-import com.amigoscode.datajpa.model.StudentIdCard;
+import com.amigoscode.datajpa.model.*;
 import com.amigoscode.datajpa.repository.StudentIdCardRepository;
 import com.amigoscode.datajpa.repository.StudentRepository;
 import com.github.javafaker.Faker;
@@ -42,6 +40,24 @@ public class Application {
             StudentIdCard studentIdCard = new StudentIdCard("123456789", student);
 
             student.setStudentIdCard(studentIdCard);
+
+            /* // methods used when there aren't Enrolment and EnrolmentId class which contain both PK FK from Student and Course
+            student.enrolToCourse(new Course("Computer Science", "IT"));
+            student.enrolToCourse(new Course("Amigoscode", "IT"));
+            */
+
+            // id's are passing in the constructor 'cause enrolment and course repositories aren't created yet
+            student.addEnrolment(new Enrolment(
+                    new EnrolmentId(1L, 1L),
+                    student,
+                    new Course("Computer Science", "IT"),
+                    LocalDateTime.now()));
+
+            student.addEnrolment(new Enrolment(
+                    new EnrolmentId(1L, 2L),
+                    student,
+                    new Course("Amigoscode", "IT"),
+                    LocalDateTime.now().minusDays(18)));
 
             studentRepository.save(student);
 

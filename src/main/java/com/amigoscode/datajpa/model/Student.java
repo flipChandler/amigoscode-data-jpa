@@ -61,6 +61,27 @@ public class Student {
             fetch = FetchType.LAZY)
     private List<Book> books = new ArrayList<>();
 
+/*  // mapping when there aren't Enrolment and EnrolmentId class which contain both PK FK from Student and Course
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinTable(
+            name = "enrolment",
+            joinColumns = @JoinColumn(
+                    name = "student_id",
+                    foreignKey = @ForeignKey(name = "enrolment_student_id_fk")
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "course_id",
+                    foreignKey = @ForeignKey(name = "enrolment_course_id_fk")
+            )
+    )
+    private List<Course> courses = new ArrayList<>();
+*/
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            mappedBy = "student"
+    )
+    private List<Enrolment> enrolments = new ArrayList<>();
+
     public Student() {
     }
 
@@ -69,6 +90,32 @@ public class Student {
         this.lastName = lastName;
         this.email = email;
         this.age = age;
+    }
+
+    /*  // methods used when there aren't Enrolment and EnrolmentId class which contain both PK FK from Student and Course
+    public void enrolToCourse(Course course) {
+        this.courses.add(course);
+        course.getStudents().add(this);          // this keep sync in both classes
+    }
+
+    public void unEnrolToCourse(Course course) {
+        this.courses.remove(course);
+        course.getStudents().remove(this);    // this keep sync in both classes
+    }
+
+*/
+    public List<Enrolment> getEnrolments() {
+        return enrolments;
+    }
+
+    public void addEnrolment(Enrolment enrolment) {
+        if (!this.enrolments.contains(enrolment)) {
+            this.enrolments.add(enrolment);
+        }
+    }
+
+    public void removeEnrolment(Enrolment enrolment) {
+        this.enrolments.remove(enrolment);
     }
 
     public Long getId() {
@@ -114,6 +161,8 @@ public class Student {
     public List<Book> getBooks() {
         return books;
     }
+
+
 
     public void setStudentIdCard(StudentIdCard studentIdCard) {
         this.studentIdCard = studentIdCard;
