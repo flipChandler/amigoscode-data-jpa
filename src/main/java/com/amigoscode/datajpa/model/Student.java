@@ -1,11 +1,14 @@
 package com.amigoscode.datajpa.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
+@Entity(name = "Student")
 @Table(name = "student",
-uniqueConstraints = {
-        @UniqueConstraint(name = "student_email_unique", columnNames = "email")
+        uniqueConstraints = {
+        @UniqueConstraint(name = "student_email_unique",
+                columnNames = "email")
 })
 public class Student {
 
@@ -13,38 +16,50 @@ public class Student {
     @SequenceGenerator(
             name = "student_sequence",
             sequenceName = "student_sequence",
-            allocationSize = 1
-    )
+            allocationSize = 1)
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "student_sequence"
-    )
-    @Column(name = "id",
+            generator = "student_sequence")
+    @Column(
+            name = "id",
             updatable = false)
     private Long id;
 
-    @Column(name = "first_name",
+    @Column(
+            name = "first_name",
             nullable = false,
             columnDefinition = "TEXT")
     private String firstName;
 
-    @Column(name = "last_name",
+    @Column(
+            name = "last_name",
             nullable = false,
             columnDefinition = "TEXT")
     private String lastName;
 
-    @Column(name = "email",
+    @Column(
+            name = "email",
             nullable = false,
             columnDefinition = "TEXT")
     private String email;
 
-    @Column(name = "age",
+    @Column(
+            name = "age",
             nullable = false)
     private Integer age;
 
-    @OneToOne(mappedBy = "student",
-            orphanRemoval = true)                       // deleting student, delete student id card too
+    @OneToOne(
+            mappedBy = "student",
+            orphanRemoval = true,
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE})                       // deleting student, delete student id card too
     private StudentIdCard studentIdCard;
+
+    @OneToMany(
+            mappedBy = "student",
+            orphanRemoval = true,
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            fetch = FetchType.LAZY)
+    private List<Book> books = new ArrayList<>();
 
     public Student() {
     }
@@ -96,23 +111,26 @@ public class Student {
         this.age = age;
     }
 
-    public StudentIdCard getStudentIdCard() {
-        return studentIdCard;
+    public List<Book> getBooks() {
+        return books;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Student)) return false;
-
-        Student student = (Student) o;
-
-        return id.equals(student.id);
+    public void setStudentIdCard(StudentIdCard studentIdCard) {
+        this.studentIdCard = studentIdCard;
     }
 
-    @Override
-    public int hashCode() {
-        return id.hashCode();
+    public void addBook(Book book) {
+        if (!this.books.contains(book)) {
+            this.books.add(book);
+            book.setStudent(this); //           because it's a bi-directional relation | sync
+        }
+    }
+
+    public void removeBook(Book book) {
+        if (this.books.contains(book)) {
+            this.books.remove(book);
+            book.setStudent(null);
+        }
     }
 
     @Override

@@ -2,10 +2,11 @@ package com.amigoscode.datajpa.model;
 
 import javax.persistence.*;
 
-@Entity
+@Entity(name = "StudentIdCard")
 @Table(name = "student_id_card",
         uniqueConstraints = {
-                @UniqueConstraint(name = "student_id_card_number_unique", columnNames = "card_number")
+                @UniqueConstraint(name = "student_id_card_number_unique",
+                        columnNames = "card_number")
         })
 public class StudentIdCard {
 
@@ -13,26 +14,26 @@ public class StudentIdCard {
     @SequenceGenerator(
             name = "student_id_card_sequence",
             sequenceName = "student_id_card_sequence",
-            allocationSize = 1
-    )
+            allocationSize = 1)
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "student_sequence"
-    )
-    @Column(name = "id",
+            generator = "student_id_card_sequence")
+    @Column(
+            name = "id",
             updatable = false)
     private Long id;
 
-    @Column(name = "card_number",
+    @Column(
+            name = "card_number",
             updatable = true,
-    length = 15)
+            length = 15)
     private String cardNumber;
 
     @OneToOne(cascade = CascadeType.ALL)                                // default is FetchType.EAGER
-    @JoinColumn(name = "student_id",
+    @JoinColumn(
+            name = "student_id",
             referencedColumnName = "id",
-            foreignKey = @ForeignKey(name = "student_id_fk")
-    )
+            foreignKey = @ForeignKey(name = "student_id_card_fk"))
     private Student student;
 
     public Student getStudent() {
@@ -65,21 +66,6 @@ public class StudentIdCard {
 
     public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StudentIdCard)) return false;
-
-        StudentIdCard that = (StudentIdCard) o;
-
-        return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
     }
 
     @Override

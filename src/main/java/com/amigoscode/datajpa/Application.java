@@ -1,5 +1,6 @@
 package com.amigoscode.datajpa;
 
+import com.amigoscode.datajpa.model.Book;
 import com.amigoscode.datajpa.model.Student;
 import com.amigoscode.datajpa.model.StudentIdCard;
 import com.amigoscode.datajpa.repository.StudentIdCardRepository;
@@ -12,6 +13,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @SpringBootApplication
 public class Application {
@@ -30,13 +34,26 @@ public class Application {
             String email = String.format("%s.%s@amigoscode.edu", firstName, lastName).toLowerCase();
             Integer age = faker.number().numberBetween(17, 55);
             Student student = new Student(firstName, lastName,email, age);
+
+            student.addBook(new Book("Clean Code", LocalDateTime.now().minusDays(4)));
+            student.addBook(new Book("Think and Grow Rich", LocalDateTime.now()));
+            student.addBook(new Book("Spring Data JPA", LocalDateTime.now().minusYears(1)));
+
             StudentIdCard studentIdCard = new StudentIdCard("123456789", student);
 
-            studentIdCardRepository.save(studentIdCard);
+            student.setStudentIdCard(studentIdCard);
 
-            studentRepository.findById(1L).ifPresent(System.out::println);
+            studentRepository.save(student);
 
-            studentIdCardRepository.findById(1L).ifPresent(System.out::println);
+            studentRepository.findById(1L).ifPresent(s -> {
+                System.out.println("fetch book lazy...");
+                List<Book> books = student.getBooks();          // that's fetching the books lazyly | by demand
+                books.forEach(book -> {
+                    System.out.println(s.getFirstName() + " borrowed " + book.getBookName());
+                });
+            });
+
+            //studentIdCardRepository.findById(1L).ifPresent(System.out::println);
         };
     }
 
@@ -66,3 +83,4 @@ public class Application {
         }
     }
 }
+ // exception -> object references an unsaved transient instance - save the transient instance before flushing -> it's missing 'cascade = {CascadeType.PERSIST, CascadeType.REMOVE}' int the @OneToOne or @ManyToMany or @OneToMany relation
